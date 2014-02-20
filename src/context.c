@@ -9,24 +9,25 @@ void context_init(
   void *stack_top
 ) {
   void **stack_ptr = (void **)stack_top;
+#define PUSH(arg) *(--stack_ptr) = (arg);
 
   // arguments to trampoline
-  *(--stack_ptr) = arg;        // argument 2
-  *(--stack_ptr) = func;       // argument 1
+  PUSH(arg);        // argument 2
+  PUSH(func);       // argument 1
   // partial stack frame for trampoline
-  *(--stack_ptr) = 0;          // dummy return address
+  PUSH(0);          // dummy return address
   void *old_ebp = stack_ptr;
 
   // arguments to context_switch
-  *(--stack_ptr) = 0;          // dummy argument 2
-  *(--stack_ptr) = cont;       // argument 1
+  PUSH(0);          // dummy argument 2
+  PUSH(cont);       // argument 1
   // stack frame for context_switch
-  *(--stack_ptr) = trampoline; // return address
-  *(--stack_ptr) = old_ebp;    // old ebp
+  PUSH(trampoline); // return address
+  PUSH(old_ebp);    // old ebp
   void *new_ebp = stack_ptr;
-  *(--stack_ptr) = 0;          // dummy saved ebx
-  *(--stack_ptr) = 0;          // dummy saved esi
-  *(--stack_ptr) = 0;          // dummy saved edi
+  PUSH(0);          // dummy saved ebx
+  PUSH(0);          // dummy saved esi
+  PUSH(0);          // dummy saved edi
 
   // save stack state into context
   cont->ebp = new_ebp;
