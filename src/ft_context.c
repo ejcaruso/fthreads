@@ -1,6 +1,10 @@
-#include "context.h"
+#include "ft_context.h"
 
-void trampoline(void *(*func)(void *), void *arg);
+#include "fthread.h"
+
+static void trampoline(void *(*func)(void *), void *arg) {
+  fthread_exit(func(arg));
+}
 
 void context_init(
   fcontext_t *cont,
@@ -14,20 +18,17 @@ void context_init(
   // arguments to trampoline
   PUSH(arg);        // argument 2
   PUSH(func);       // argument 1
-  // partial stack frame for trampoline
-  PUSH(0);          // dummy return address
+  PUSH(0);          // dummy return value
   void *old_ebp = stack_ptr;
 
-  // arguments to context_switch
-  PUSH(0);          // dummy argument 2
-  PUSH(cont);       // argument 1
   // stack frame for context_switch
-  PUSH(trampoline); // return address
+  // no arguments because they don't matter...
+  PUSH(trampoline); // first function
   PUSH(old_ebp);    // old ebp
   void *new_ebp = stack_ptr;
-  PUSH(0);          // dummy saved ebx
-  PUSH(0);          // dummy saved esi
-  PUSH(0);          // dummy saved edi
+  PUSH(0);            // dummy saved ebx
+  PUSH(0);            // dummy saved esi
+  PUSH(0);            // dummy saved edi
 
   // save stack state into context
   cont->ebp = new_ebp;

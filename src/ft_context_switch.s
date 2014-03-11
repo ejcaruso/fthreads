@@ -1,17 +1,5 @@
-.global trampoline
 .global context_switch
 .text
-
-trampoline:
-  subl  $0x4, %ebp
-  movl  %ebp, %esp
-  subl  $0x4, %esp
-  movl  0xc(%ebp), %eax
-  movl  %eax, (%esp)
-  movl  0x8(%ebp), %eax
-  call  *%eax
-trampoline_end:
-  jmp   trampoline_end
 
 context_switch:
   pushl %ebp
