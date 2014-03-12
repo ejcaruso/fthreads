@@ -30,4 +30,10 @@ int fthread_cond_signal(fthread_cond_t *cond);
 int fthread_cond_broadcast(fthread_cond_t *cond);
 int fthread_cond_destroy(fthread_cond_t *cond);
 
+/* barrier functions */
+
+int fthread_barrier_init(fthread_barrier_t *barrier, unsigned int count);
+int fthread_barrier_wait(fthread_barrier_t *barrier);
+int fthread_barrier_destroy(fthread_barrier_t *barrier);
+
 #endif
