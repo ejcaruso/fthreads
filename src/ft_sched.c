@@ -8,7 +8,7 @@
 #include "ft_queue.h"
 #include "ft_types.h"
 
-static queue_t sched_runq = STATIC_QUEUE_INITIALIZER;
+static queue_t sched_runq = __QUEUE_INITIALIZER;
 
 void __attribute__((constructor)) sched_init() {
   // right now, this is a no-op. this could do more work if we need
@@ -56,4 +56,8 @@ fthread_t sched_wakeup_on(queue_t *q) {
   thr->state = AVAILABLE;
   queue_enqueue(&sched_runq, thr);
   return thr;
+}
+
+void sched_broadcast_on(queue_t *q) {
+  while (sched_wakeup_on(q));
 }

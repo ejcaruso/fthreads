@@ -9,5 +9,6 @@ void      sched_schedule(fthread_t thr);
 void      sched_relinquish();
 void      sched_sleep_on(queue_t *q);
 fthread_t sched_wakeup_on(queue_t *q);
+void      sched_broadcast_on(queue_t *q);
 
 #endif

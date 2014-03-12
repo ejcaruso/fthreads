@@ -1,14 +1,12 @@
 #ifndef FT_QUEUE_H
 #define FT_QUEUE_H
 
-struct node;
+#include "bits/fthreadtypes.h"
 
-typedef struct queue {
-  struct node *head;
-  struct node *tail;
-} queue_t;
-
-#define STATIC_QUEUE_INITIALIZER {0, 0}
+struct node {
+  void        *data;
+  struct node *next;
+};
 
 void  queue_init(queue_t *q);
 void  queue_destroy(queue_t *q);

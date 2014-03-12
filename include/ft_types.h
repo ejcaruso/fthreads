@@ -17,15 +17,14 @@ struct _fthread {
   fcontext_t  cont;
   fstate_t    state;
   void       *retval;
-  // current wait channel, or runqueue
+  // join/detach information
+  int         detached;
+  int         reapable;
+  queue_t     joiners;
+  // current wait queue, or runqueue
   queue_t    *waitchan;
   // thread stack
   void       *tstack;
-};
-
-struct _fmutex {
-  struct _fthread *holder;
-  queue_t          waitq;
 };
 
 #endif

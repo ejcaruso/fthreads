@@ -1,63 +1,55 @@
 #include <errno.h>
-#include <stdlib.h>
 #include "fthread.h"
 #include "ft_globals.h"
 #include "ft_queue.h"
 #include "ft_sched.h"
-#include "ft_types.h"
 
 int fthread_mutex_init(fthread_mutex_t *mutex) {
-  fthread_mutex_t m = (fthread_mutex_t)malloc(sizeof(fthread_mutex_t));
-  if (!m) {
-    return ENOMEM;
-  }
-
-  m->holder = 0;
-  queue_init(&m->waitq);
-  *mutex = m;
+  mutex->__holder = 0;
+  queue_init(&mutex->__waitq);
+  mutex->__usecount = 0;
   return 0;
 }
 
 int fthread_mutex_lock(fthread_mutex_t *mutex) {
-  fthread_mutex_t m = *mutex;
-  if (m->holder) {
-    if (m->holder == current_thread) {
+  mutex->__usecount++;
+  if (mutex->__holder) {
+    if (mutex->__holder == current_thread) {
+      mutex->__usecount--;
       return EDEADLK;
     }
-    sched_sleep_on(&m->waitq);
+    sched_sleep_on(&mutex->__waitq);
   }
 
-  m->holder = current_thread;
+  mutex->__holder = current_thread;
   return 0;
 }
 
 int fthread_mutex_trylock(fthread_mutex_t *mutex) {
-  fthread_mutex_t m = *mutex;
-  if (m->holder) {
+  if (mutex->__holder) {
     return EBUSY;
   }
 
-  m->holder = current_thread;
+  mutex->__usecount++;
+  mutex->__holder = current_thread;
   return 0;
 }
 
 int fthread_mutex_unlock(fthread_mutex_t *mutex) {
-  fthread_mutex_t m = *mutex;
-  if (m->holder != current_thread) {
+  if (mutex->__holder != current_thread) {
     return EPERM;
   }
 
-  m->holder = sched_wakeup_on(&m->waitq);
+  mutex->__holder = sched_wakeup_on(&mutex->__waitq);
+  mutex->__usecount--;
   return 0;
 }
 
 int fthread_mutex_destroy(fthread_mutex_t *mutex) {
-  fthread_mutex_t m = *mutex;
-  if (m->holder) {
+  if (mutex->__usecount) {
     return EBUSY;
   }
 
-  queue_destroy(&m->waitq);
-  free(m);
+  queue_destroy(&mutex->__waitq);
   return 0;
 }
