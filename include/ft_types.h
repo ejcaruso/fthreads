@@ -17,6 +17,7 @@ struct _fthread {
   fcontext_t  cont;
   fstate_t    state;
   void       *retval;
+  int         terrno;
   // join/detach information
   int         detached;
   int         reapable;

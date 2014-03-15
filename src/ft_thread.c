@@ -97,8 +97,9 @@ void fthread_exit(void *retval) {
  
   if (current_thread->detached) {
     submit_to_reapd(current_thread);
+  } else {
+    num_threads--;
   }
-  num_threads--;
   sched_switch();
 }
 
@@ -136,6 +137,10 @@ int fthread_join(fthread_t thread, void **retval) {
   *retval = thread->retval;
   fthread_destroy(thread);
   return 0;
+}
+
+int *__fthread_errno() {
+  return &current_thread->terrno;
 }
 
 /* REAPD FUNCTIONS BELOW */

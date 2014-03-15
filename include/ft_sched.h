@@ -11,4 +11,6 @@ void      sched_sleep_on(queue_t *q);
 fthread_t sched_wakeup_on(queue_t *q);
 void      sched_broadcast_on(queue_t *q);
 
+void      sched_wait_for_event();
+
 #endif

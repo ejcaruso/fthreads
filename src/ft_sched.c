@@ -18,8 +18,7 @@ void __attribute__((constructor)) sched_init() {
 void sched_switch() {
   fthread_t next_thread;
   while (!(next_thread = (fthread_t)queue_dequeue(&sched_runq))) {
-    // TODO: select across pending I/O requests
-    for (;;) sched_yield();
+    sched_wait_for_event();
   }
 
   fthread_t prev_thread = current_thread;

@@ -13,7 +13,6 @@ void queue_destroy(queue_t *q) {
     next = c->next;
     free(c);
   }
-  free(q);
 }
 
 void queue_enqueue(queue_t *q, void *data) {
