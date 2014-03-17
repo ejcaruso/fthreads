@@ -33,7 +33,10 @@ $(COBJS): %.o : %.c
 $(SOBJS): %.o : %.s
 	$(CC) $(CFLAGS) $(IFLAGS) -o $@ $^
 
-$(LIB): $(COBJS) $(SOBJS)
+$(BIN):
+	mkdir -p $(BIN)
+
+$(LIB): $(COBJS) $(SOBJS) | $(BIN)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 $(EBINS): % : %.c $(LIB)
