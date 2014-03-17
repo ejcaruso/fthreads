@@ -1,5 +1,6 @@
 #include "ft_sched.h"
 
+#include <errno.h>
 #include <sched.h>
 
 #include "fthread.h"
@@ -16,6 +17,8 @@ void __attribute__((constructor)) sched_init() {
 }
 
 void sched_switch() {
+  current_thread->terrno = errno;
+
   fthread_t next_thread;
   while (!(next_thread = (fthread_t)queue_dequeue(&sched_runq))) {
     sched_wait_for_event();
@@ -24,6 +27,7 @@ void sched_switch() {
   fthread_t prev_thread = current_thread;
   current_thread = next_thread;
   current_thread->state = RUNNING;
+  errno = current_thread->terrno;
   
   context_switch(&prev_thread->cont, &current_thread->cont);
   // now we're in the context of the next thread

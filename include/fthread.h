@@ -2,7 +2,6 @@
 #define FT_FTHREAD_H
 
 #include "bits/fthreadtypes.h"
-#include "bits/fterrno.h"
 
 /* thread functions */
 

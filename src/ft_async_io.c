@@ -51,6 +51,7 @@ struct io_entry {
   int             fd;
   fthread_mutex_t mutex;
   queue_t         waitq;
+  int             waiters;
 };
 
 static int fdcmp(const void *pa, const void *pb) {
@@ -84,8 +85,14 @@ static int submit_io_req(int fd, enum io_type type) {
       return EAGAIN;
     }
 
+    // At this point, *(struct io_entry **)nodep == io_ent
     fthread_mutex_init(&io_ent->mutex);
     queue_init(&io_ent->waitq);
+    io_ent->waiters = 1;
+  } else {
+    free(io_ent);
+    io_ent = *(struct io_entry **)nodep;
+    io_ent->waiters++;
   }
   
   // Get the mutex for the io_entry and try to submit a request.
@@ -114,8 +121,9 @@ static int submit_io_req(int fd, enum io_type type) {
   // IO is ready
   fthread_mutex_unlock(&io_ent->mutex);
 
-  if (queue_empty(&io_ent->waitq)) {
+  if (!--io_ent->waiters) {
     tdelete(io_ent, &io_map[type], fdcmp);
+    free(io_ent);
   }
   return 0;
 }

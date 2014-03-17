@@ -139,10 +139,6 @@ int fthread_join(fthread_t thread, void **retval) {
   return 0;
 }
 
-int *__fthread_errno() {
-  return &current_thread->terrno;
-}
-
 /* REAPD FUNCTIONS BELOW */
 
 static void __attribute__((constructor)) reapd_init() {
