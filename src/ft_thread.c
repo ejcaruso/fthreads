@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include "ft_assert.h"
 #include "ft_config.h"
 #include "ft_context.h"
 #include "ft_globals.h"
@@ -41,12 +42,10 @@ int fthread_create(
   if (stack_bottom == MAP_FAILED) {
     return EAGAIN;
   }
+
   // protect bottom of stack
-  if (mmap(stack_bottom, page_size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS,
-           -1, 0) == MAP_FAILED) {
-    // should never actually happen
-    return EAGAIN;
-  }
+  ftassert(mmap(stack_bottom, page_size, PROT_NONE,
+                MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) == stack_bottom);
   
   // initialize thread state
   void *stack_top = stack_bottom + STACK_SIZE_PAGES * page_size;
@@ -101,6 +100,7 @@ void fthread_exit(void *retval) {
     num_threads--;
   }
   sched_switch();
+  ftpanic("Returned to exited thread");
 }
 
 int fthread_detach(fthread_t thread) {

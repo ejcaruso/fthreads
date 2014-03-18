@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 
 #include "fthread.h"
+#include "ft_assert.h"
 #include "ft_sched.h"
 #include "ft_queue.h"
 
@@ -19,9 +20,7 @@ static void *libc;
 
 static void __attribute__((constructor)) async_init() {
   libc = dlopen(LIBC, RTLD_LAZY);
-  if (!libc) {
-    exit(1);
-  }
+  ftassert(libc);
 }
 
 static void __attribute__((destructor)) async_fini() {
@@ -84,8 +83,8 @@ static int submit_io_req(int fd, enum io_type type) {
     if (!nodep) {
       return EAGAIN;
     }
+    ftassert(*(struct io_entry **)nodep == io_ent);
 
-    // At this point, *(struct io_entry **)nodep == io_ent
     fthread_mutex_init(&io_ent->mutex);
     queue_init(&io_ent->waitq);
     io_ent->waiters = 1;
@@ -110,10 +109,7 @@ static int submit_io_req(int fd, enum io_type type) {
   switch(type) {
     case READ: pfd->events = POLLIN; break;
     case WRITE: pfd->events = POLLOUT; break;
-    default: {
-      fthread_mutex_unlock(&io_ent->mutex);
-      return EINVAL;
-    }
+    default: ftpanic("Unidentified IO type submitted");
   }
 
   sched_sleep_on(&io_ent->waitq);
@@ -133,9 +129,7 @@ static void wakeup_for_io(int fd, enum io_type type) {
 
   io_ent.fd = fd;
   void *nodep = tfind(&io_ent, &io_map[type], fdcmp);
-  if (!nodep) {
-    return;
-  }
+  ftassert(nodep);
 
   sched_wakeup_on(&(*(struct io_entry **)nodep)->waitq);
 }

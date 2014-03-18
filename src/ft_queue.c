@@ -1,6 +1,7 @@
 #include "ft_queue.h"
 
 #include <stdlib.h>
+#include "ft_assert.h"
 
 void queue_init(queue_t *q) {
   q->__head = 0;
