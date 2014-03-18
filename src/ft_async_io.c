@@ -141,7 +141,7 @@ static void wakeup_for_io(int fd, enum io_type type) {
 }
 
 ssize_t read(int fd, char *buf, size_t count) {
-  static int (*sys_read)(int, char *, size_t) = 0;
+  static ssize_t (*sys_read)(int, char *, size_t) = 0;
 
   int ret = submit_io_req(fd, READ);
   if (ret) {
@@ -156,7 +156,7 @@ ssize_t read(int fd, char *buf, size_t count) {
 }
 
 ssize_t write(int fd, const char *buf, size_t count) {
-  static int (*sys_write)(int, const char *, size_t) = 0;
+  static ssize_t (*sys_write)(int, const char *, size_t) = 0;
 
   int ret = submit_io_req(fd, WRITE);
   if (ret) {
@@ -190,12 +190,7 @@ void sched_wait_for_event() {
   // first, poll across all the in-flight requests
   int saved_errno = errno;
   
-  for (;;) {
-    int ret = poll(in_flight, next_req_pos, -1);
-    if (ret > 0) {
-      break;
-    }
-  }
+  while (poll(in_flight, next_req_pos, -1) < 0);
   errno = saved_errno;
   
   // check the revents fields of each pollfd struct
