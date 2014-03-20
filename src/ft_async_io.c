@@ -197,7 +197,7 @@ void sched_wait_for_event() {
     if (req->events & req->revents || req->events & POLLHUP) {
       wakeup_for_io(req->fd, (req->events == POLLIN ? READ : WRITE));
     } else {
-      memcpy(&in_flight[new_req_pos++], req, sizeof(struct pollfd));
+      memmove(&in_flight[new_req_pos++], req, sizeof(struct pollfd));
     } 
   }
 
